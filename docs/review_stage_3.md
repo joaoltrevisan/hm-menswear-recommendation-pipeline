@@ -4,11 +4,11 @@ Status: verified; the same sole read-only reviewer resolved P2 on final re-revie
 
 Implemented: immutable pinned intake, independent strict CSV structural/count gate, bounded pandas string chunks, private disk-indexed preparation, exact value validation, source ordinals, preserved equal occurrences, independent observation registry, durable preparation/load attempts, staged COPY, atomic dated publication, payload equality checks, overlap/no-op handling, ownership-based recovery, safe CLI/status/logging and simulated full-history arrival.
 
-Initial regression and actual container log-safety gate: 71 tests passed in 5.49 seconds, no skips. The broader initial synthetic unit/integration suite then passed 100 tests in 17.48 seconds, no skips. The expanded source/preparation/load cases passed 106 tests in 7.78 seconds. A real worker-termination test was then added; its initial synchronization query was corrected to find the uncommitted final state before SIGKILL, and final verification follows below. These checks are separate from the ongoing full-source preparation/reconciliation; no model results are claimed.
+Initial regression and actual container log-safety gate: 71 tests passed in 5.49 seconds, no skips. The broader initial synthetic unit/integration suite then passed 100 tests in 17.48 seconds, no skips. The expanded source/preparation/load cases passed 106 tests in 7.78 seconds. A real worker-termination test was then added; its initial synchronization query was corrected to find the uncommitted final state before SIGKILL, and final verification follows below. These checks are separate from the full-source preparation/reconciliation; no model results are claimed.
 
 Logging gate: failed synthetic conversion, COPY conversion and COPY constraint markers did not appear in the actual recreated PostgreSQL container logs. Runtime code checks required server settings before source preparation/publication. Application errors emit safe codes instead of input-bearing database diagnostics.
 
-Full-source execution, review findings/corrections, final verification counts and operational limitations will be recorded before Stage 3 delivery. The original CSVs remain untouched. Model training/evaluation is not part of this stage.
+Full-source execution, review findings/corrections, final verification counts and operational limitations are recorded below. The original CSVs remain untouched. Model training/evaluation is not part of this stage.
 
 ## Full-source preparation
 
