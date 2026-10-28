@@ -9,10 +9,18 @@ import psycopg
 from hm_menswear import __version__
 from hm_menswear.config import ConfigurationError, Settings
 from hm_menswear.db import DatabaseContractError, connect, migrate, provision
+from hm_menswear.evaluation.evaluate import evaluate_model
+from hm_menswear.evaluation.protocol import load_protocol
 from hm_menswear.extraction.source import canonical_json, capture_sources
 from hm_menswear.loading.lifecycle import recover_run
 from hm_menswear.loading.preparation import prepare_dataset
 from hm_menswear.loading.publish import load_all, load_window
+from hm_menswear.recommendation.artifacts import load_registered_model, recommend
+from hm_menswear.recommendation.workflow import (
+    compare_baselines,
+    save_private_report,
+    train_baseline,
+)
 from hm_menswear.safety import PipelineError, assert_log_safety
 
 
@@ -46,6 +54,20 @@ def parser():
     recover.add_argument("--run", required=True)
     commands.add_parser("status")
     commands.add_parser("verify-log-settings")
+    train = commands.add_parser("train")
+    train.add_argument("--model", choices=["popularity", "repeat_history"], required=True)
+    train.add_argument("--cutoff", required=True)
+    train.add_argument("--window-days", type=int, default=14)
+    evaluate = commands.add_parser("evaluate")
+    evaluate.add_argument("--model-id", required=True)
+    evaluate.add_argument("--split", choices=["validation", "test"], default="validation")
+    evaluate.add_argument("--output", required=True)
+    compare = commands.add_parser("compare-baselines")
+    compare.add_argument("--output", required=True)
+    recommendations = commands.add_parser("recommend")
+    recommendations.add_argument("--model-id", required=True)
+    recommendations.add_argument("--customer", required=True)
+    recommendations.add_argument("--k", type=int, default=12)
     return root
 
 
@@ -61,6 +83,40 @@ def source_names(args):
 
 
 def execute(args, settings):
+    if args.command == "train":
+        model = train_baseline(settings, args.model, args.cutoff, args.window_days, load_protocol())
+        return {
+            "status": "trained",
+            "model_id": model["model_id"],
+            **{
+                key: model["manifest"][key]
+                for key in [
+                    "cutoff",
+                    "family",
+                    "candidate_count",
+                    "known_customers",
+                    "warm_customers",
+                ]
+            },
+        }
+    if args.command == "compare-baselines":
+        report = compare_baselines(settings, load_protocol())
+        save_private_report(settings, args.output, report)
+        return {
+            "status": report["status"],
+            "selected_model_id": report["selected_baseline_model_id"],
+            "family": report["selected_baseline_family"],
+            "parameters": report["selected_baseline_parameters"],
+            "final_test_consumed": False,
+        }
+    if args.command in ("evaluate", "recommend"):
+        with connect(settings.dsn, autocommit=True) as conn:
+            model = load_registered_model(conn, settings.work_dir, args.model_id)
+            if args.command == "recommend":
+                return recommend(model, args.customer, args.k)
+            report = evaluate_model(conn, model, load_protocol(), split=args.split)
+        save_private_report(settings, args.output, report)
+        return report
     if args.command == "check-config":
         return {"status": "valid", "purpose": settings.purpose, "chunk_size": settings.chunk_size}
     if args.command == "db":
@@ -125,6 +181,10 @@ def main(argv=None):
             if args.command == "db" and args.action == "provision"
             else "migration"
             if args.command == "db"
+            else "model"
+            if args.command in ("train", "evaluate", "compare-baselines")
+            else "reader"
+            if args.command == "recommend"
             else "loader"
         )
     )

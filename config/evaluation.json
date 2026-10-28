@@ -1,0 +1,44 @@
+{
+  "version": "menswear-seven-day-v1",
+  "k": 12,
+  "source_start": "2018-09-20",
+  "source_end": "2020-09-22",
+  "validation": {
+    "cutoff": "2020-09-08",
+    "start": "2020-09-09",
+    "end": "2020-09-16"
+  },
+  "test": {
+    "cutoff": "2020-09-15",
+    "start": "2020-09-16",
+    "end": "2020-09-23"
+  },
+  "population": "any_segment_identity_observed_by_cutoff",
+  "candidates": "menswear_purchased_by_cutoff",
+  "relevance": "distinct_future_menswear_articles_including_unavailable",
+  "no_future_purchase": "zero_ap_and_recall_in_primary_population",
+  "repeat_purchase_recommendations": true,
+  "popularity_windows": [
+    7,
+    14,
+    28
+  ],
+  "item_training_windows": [
+    90,
+    180
+  ],
+  "neighbors": [
+    20,
+    50
+  ],
+  "minimum_pair_support": 2,
+  "family_tie_order": [
+    "popularity",
+    "repeat_history",
+    "item_item"
+  ],
+  "random_seed": 0,
+  "item_score_popularity_tie": "best_popularity_validation_window",
+  "item_history_fallback": "best_repeat_history_validation_configuration",
+  "item_cold_fallback": "same_repeat_history_popularity_filler"
+}

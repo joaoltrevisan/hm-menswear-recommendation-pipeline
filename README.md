@@ -2,10 +2,12 @@
 
 Independent educational case study with a simulated service scenario. No employment, commission, affiliation with H&M, live internal integration, current competition participation, or commercial outcome is claimed.
 
-**Status: Stage 3 pipeline verified and independently reviewed; continuing to temporal baselines.** Configuration, numbered PostgreSQL migrations, least-privilege groups, a dependency lock and synthetic tests are present. Historical preparation/loading is implemented and reconciled on the complete source; recommendation/evaluation algorithms follow in Stages 4–5.
+**Status: Stage 4 temporal baselines implemented; synthetic checks and independent review in progress.** Configuration, numbered PostgreSQL migrations, least-privilege groups, a dependency lock and synthetic tests are present. Historical preparation/loading is implemented and reconciled on the complete source; baseline ranking and temporal evaluation are implemented; personalized item-item comparison follows in Stage 5.
 
 The proposed service preserves purchase occurrences, loads traceable Menswear data into PostgreSQL, and ranks up to 12 distinct articles for a seven-day horizon through a reproducible CLI. It starts with recent popularity and repeat-history baselines before testing sparse item-item similarity.
 
+- [Model and evaluation commands](docs/model_operations.md)
+- [Stage 4 verification and review](docs/review_stage_4.md)
 - [Historical pipeline commands and recovery](docs/pipeline_operations.md)
 - [Stage 3 verification and review](docs/review_stage_3.md)
 - [Setup, database commands and Stage 2 verification](docs/stage_2_operations.md)
