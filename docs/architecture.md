@@ -1,6 +1,6 @@
 # Stage 1 architecture and data contract
 
-Status: proposal, not implemented. This document specifies the later implementation and its acceptance obligations.
+Status: Stage 1 design approved by the user; Stage 2 implements the configuration and database foundation. Loading, recovery workflows, models and evaluation remain later-stage obligations. See [implemented schema](schema.md) and [Stage 2 operations](stage_2_operations.md) for the concrete foundation.
 
 ## Requirements and boundaries
 

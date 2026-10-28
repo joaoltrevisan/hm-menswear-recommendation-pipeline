@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling==1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hm-menswear-recommendation-pipeline"
+version = "0.2.0"
+description = "Independent educational Menswear data engineering and recommendation case study"
+readme = "README.md"
+requires-python = "==3.12.*"
+dependencies = [
+  "numpy==2.5.4",
+  "pandas==3.1.0",
+  "psycopg[binary]==3.3.6",
+  "scipy==1.18.1",
+]
+
+[project.scripts]
+hm-menswear = "hm_menswear.cli:main"
+
+[dependency-groups]
+dev = ["hatchling==1.33.0", "pytest==9.2.0", "ruff==0.17.3"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hm_menswear"]
+
+[tool.uv]
+required-version = "==0.13.6"
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+markers = ["integration: requires a real isolated PostgreSQL 18 server"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "B", "UP"]
