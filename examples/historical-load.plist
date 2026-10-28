@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>independent.hm-menswear.historical-load</string>
+<key>ProgramArguments</key><array><string>/path/to/project/scripts/load_next.sh</string></array>
+<key>WorkingDirectory</key><string>/path/to/project</string>
+<key>EnvironmentVariables</key><dict><key>HM_PROJECT_DIR</key><string>/path/to/project</string><key>HM_PREPARATION_ID</key><string>PREPARATION_UUID</string></dict>
+<key>StartCalendarInterval</key><dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
+<key>StandardOutPath</key><string>/path/to/private-work/logs/scheduler.jsonl</string>
+<key>StandardErrorPath</key><string>/path/to/private-work/logs/scheduler-errors.log</string>
+</dict></plist>

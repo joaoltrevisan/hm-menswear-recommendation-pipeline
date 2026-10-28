@@ -1,6 +1,6 @@
 # Delivery stages, acceptance, and operation
 
-Stages 1–2 are delivered. The user authorized continuing through Stages 3–6 without further start approvals. The Stage 2 delivery implements the project/configuration/schema foundation only. Exactly one independent technical reviewer reads files without altering them; the implementer fixes required findings and returns corrections to the same reviewer. From Stage 2, each authorized stage requires meaningful checks, review, required fixes and re-review, inspected diff, coherent English commit(s), private push, and a user-facing report before asking to start the next stage. No force push or rewritten history.
+All six stages are implemented and independently reviewed. The user authorized continuing through Stages 3–6 without further start approvals. The Stage 2 delivery implements the project/configuration/schema foundation only. Exactly one independent technical reviewer reads files without altering them; the implementer fixes required findings and returns corrections to the same reviewer. From Stage 2, each authorized stage requires meaningful checks, review, required fixes and re-review, inspected diff, coherent English commit(s), private push, and a user-facing report. Standing authorization removes repeated start approvals. No force push or rewritten history.
 
 | Stage | Authorized work after its gate | Acceptance evidence |
 | --- | --- | --- |
@@ -29,28 +29,9 @@ Stages 1–2 are delivered. The user authorized continuing through Stages 3–6 
 
 Local file inspection is separate from pytest tests of the future implementation. Tests must run against actual PostgreSQL for lock, transaction and privilege behavior; SQLite/mocks cannot certify those. Record commands, versions, outcomes, skipped checks and limits at each delivery. Do not invent benchmark throughput or model scores.
 
-## Proposed CLI, not executable yet
+## Executable commands and operational boundaries
 
-The future executable is `hm-menswear`. Environment: `HM_RAW_DIR`, `HM_WORK_DIR`, `HM_DATABASE_DSN`, and role-specific migration/read DSNs as required; `.env.example` will contain placeholders, never local personal paths or credentials.
-
-```text
-hm-menswear inspect --output <private-report>
-hm-menswear prepare --release <manifest>
-hm-menswear load --release <manifest> --start 2018-09-20 --end 2018-09-27
-hm-menswear load --release <manifest> --start 2018-09-20 --end 2018-09-27
-hm-menswear status
-hm-menswear recover --run <uuid>
-hm-menswear train --cutoff 2020-09-08 --model popularity
-hm-menswear evaluate --split validation --config <versioned-config>
-hm-menswear select --validation-report <private-report>
-hm-menswear train --cutoff 2020-09-15 --selected-recipe <frozen-manifest>
-hm-menswear evaluate --split test --selected-recipe <frozen-manifest>
-hm-menswear recommend --model <model-id> --customer <synthetic-customer-id> --k 12
-```
-
-The repeated load demonstrates idempotency. Exact executable commands, argument semantics and exit codes are Stage 6 deliverables. No command in this document is claimed runnable now. Dates are half-open; initial partial week and end-of-source windows are explicit. All periods must be loaded without gaps through a model cutoff. CLI use for real customers stays local.
-
-Data publication, model retraining and recommendation generation are separate jobs. A successful load does not silently retrain or replace the selected model. Train writes an immutable artifact; explicit generation references that model. Schedule examples (opt-in macOS launchd and Linux cron) will process the next historical window, retry only transient failures with bounded backoff, stop at source end, and retain safe operational counts. No live update claims or installed timers. Failed jobs return nonzero and never mark incomplete batches/models complete.
+All six stages are implemented. The exact runnable CLI and opt-in schedule examples are in the [operations runbook](operations.md), supported by the [pipeline](pipeline_operations.md) and [model](model_operations.md) runbooks. Earlier CLI sketches are superseded. Source publication, selected-recipe retraining and recommendation queries remain explicit separate jobs. Scheduling examples are not installed; the finite historical arrival command stops publishing at source end. The final test was reserved/frozen in Stage 5 and is now consumed; later releases can export its stored reports without new label access.
 
 ## Git and privacy
 

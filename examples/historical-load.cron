@@ -1,0 +1,4 @@
+# Opt-in example only: replace placeholders; do not install unchanged.
+HM_PROJECT_DIR=/path/to/project
+HM_PREPARATION_ID=PREPARATION_UUID
+0 9 * * * /path/to/project/scripts/load_next.sh >> /path/to/private-work/logs/scheduler.jsonl 2>> /path/to/private-work/logs/scheduler-errors.log

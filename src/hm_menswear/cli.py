@@ -13,11 +13,13 @@ from hm_menswear.evaluation.evaluate import evaluate_model
 from hm_menswear.evaluation.holdout import frozen_final_test
 from hm_menswear.evaluation.protocol import load_protocol
 from hm_menswear.extraction.source import canonical_json, capture_sources
+from hm_menswear.jobs import load_next
 from hm_menswear.loading.lifecycle import recover_run
 from hm_menswear.loading.preparation import prepare_dataset
 from hm_menswear.loading.publish import load_all, load_window
 from hm_menswear.recommendation.artifacts import load_registered_model, recommend
 from hm_menswear.recommendation.comparison import compare_models
+from hm_menswear.recommendation.selected import export_test, retrain_selected
 from hm_menswear.recommendation.workflow import (
     compare_baselines,
     report_path,
@@ -53,6 +55,10 @@ def parser():
     all_batches = commands.add_parser("load-all")
     all_batches.add_argument("--preparation", required=True)
     all_batches.add_argument("--batch-days", type=int, default=7)
+    step = commands.add_parser("load-next")
+    step.add_argument("--preparation", required=True)
+    step.add_argument("--batch-days", type=int, default=7)
+    step.add_argument("--attempts", type=int, default=3)
     recover = commands.add_parser("recover")
     recover.add_argument("--run", required=True)
     commands.add_parser("status")
@@ -72,9 +78,17 @@ def parser():
     final = commands.add_parser("final-test")
     final.add_argument("--comparison", required=True)
     final.add_argument("--output", required=True)
+    retrain = commands.add_parser("retrain-selected")
+    retrain.add_argument("--session", required=True)
+    retrain.add_argument("--cutoff", required=True)
+    export = commands.add_parser("export-test")
+    export.add_argument("--session", required=True)
+    export.add_argument("--output", required=True)
     recommendations = commands.add_parser("recommend")
     recommendations.add_argument("--model-id", required=True)
-    recommendations.add_argument("--customer", required=True)
+    customer = recommendations.add_mutually_exclusive_group(required=True)
+    customer.add_argument("--customer")
+    customer.add_argument("--customer-stdin", action="store_true")
     recommendations.add_argument("--k", type=int, default=12)
     return root
 
@@ -91,6 +105,21 @@ def source_names(args):
 
 
 def execute(args, settings):
+    if args.command == "load-next":
+        return load_next(
+            settings, args.preparation, batch_days=args.batch_days, attempts=args.attempts
+        )
+    if args.command == "retrain-selected":
+        return retrain_selected(settings, args.session, args.cutoff, load_protocol())
+    if args.command == "export-test":
+        report_path(settings, args.output)
+        report = export_test(settings, args.session)
+        save_private_report(settings, args.output, report)
+        return {
+            "status": report["status"],
+            "test_session_id": report["test_session_id"],
+            "stored_reports": len(report["reports"]),
+        }
     if args.command == "train":
         model = train_baseline(settings, args.model, args.cutoff, args.window_days, load_protocol())
         return {
@@ -140,7 +169,10 @@ def execute(args, settings):
         with connect(settings.dsn, autocommit=True) as conn:
             model = load_registered_model(conn, settings.work_dir, args.model_id)
             if args.command == "recommend":
-                return recommend(model, args.customer, args.k)
+                import sys
+
+                customer = sys.stdin.read(67).strip() if args.customer_stdin else args.customer
+                return recommend(model, customer, args.k)
             report_path(settings, args.output)
             report = evaluate_model(conn, model, load_protocol(), split=args.split)
         save_private_report(settings, args.output, report)
@@ -211,7 +243,15 @@ def main(argv=None):
             if args.command == "db"
             else "model"
             if args.command
-            in ("train", "evaluate", "compare-baselines", "compare-models", "final-test")
+            in (
+                "train",
+                "evaluate",
+                "compare-baselines",
+                "compare-models",
+                "final-test",
+                "retrain-selected",
+                "export-test",
+            )
             else "reader"
             if args.command == "recommend"
             else "loader"
