@@ -11,7 +11,7 @@ import pytest
 from psycopg import sql
 from psycopg.conninfo import make_conninfo
 
-from hm_menswear.db import connect, migrate, provision
+from hm_menswear.db import connect, migrate, migration_sources, provision
 
 
 @dataclass
@@ -37,7 +37,7 @@ def database(request):
     logins = {}
     with connect(dsn, autocommit=True) as admin:
         admin.execute(sql.SQL("CREATE DATABASE {} TEMPLATE template0").format(sql.Identifier(name)))
-        target = make_conninfo(dsn, dbname=name)
+        target = make_conninfo(dsn, dbname=name, password=admin.info.password)
         try:
             with connect(target) as conn:
                 provision(conn, name)
@@ -64,7 +64,7 @@ def database(request):
 @pytest.fixture
 def migrated(database):
     with database.connect("migrator") as conn:
-        assert len(migrate(conn)) == 3
+        assert len(migrate(conn)) == len(migration_sources())
     return database
 
 

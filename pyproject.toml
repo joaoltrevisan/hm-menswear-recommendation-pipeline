@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hm-menswear-recommendation-pipeline"
-version = "0.2.0"
+version = "0.3.0"
 description = "Independent educational Menswear data engineering and recommendation case study"
 readme = "README.md"
 requires-python = "==3.12.*"

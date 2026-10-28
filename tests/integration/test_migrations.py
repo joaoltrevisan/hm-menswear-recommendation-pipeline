@@ -18,7 +18,9 @@ def test_install_rerun_and_real_migrator_identity(migrated):
         assert migrate(conn) == []
         with conn.transaction():
             conn.execute("SET LOCAL ROLE hm_owner")
-            assert conn.execute("SELECT count(*) FROM control.schema_migrations").fetchone()[0] == 3
+            assert conn.execute("SELECT count(*) FROM control.schema_migrations").fetchone()[
+                0
+            ] == len(db.migration_sources())
             assert conn.execute("SELECT count(*) FROM control.lineage").fetchone()[0] == 1
 
 
@@ -39,7 +41,7 @@ def test_failed_migration_rolls_back_all_schema(database, monkeypatch):
             original
             + [
                 (
-                    "0004_synthetic_failure.sql",
+                    "0005_synthetic_failure.sql",
                     "CREATE TABLE mart.synthetic_failure(id int); SELECT 1/0;",
                     "f" * 64,
                 )
@@ -54,7 +56,7 @@ def test_failed_migration_rolls_back_all_schema(database, monkeypatch):
         assert conn.execute("SELECT to_regnamespace('mart') IS NULL").fetchone()[0]
     monkeypatch.setattr(db, "migration_sources", lambda: original)
     with database.connect("migrator") as conn:
-        assert len(migrate(conn)) == 3
+        assert len(migrate(conn)) == len(db.migration_sources())
 
 
 def test_two_migrators_are_serialized(database):
@@ -67,7 +69,7 @@ def test_two_migrators_are_serialized(database):
 
     with ThreadPoolExecutor(max_workers=2) as pool:
         results = list(pool.map(lambda _: worker(), range(2)))
-    assert sorted(map(len, results)) == [0, 3]
+    assert sorted(map(len, results)) == [0, len(db.migration_sources())]
 
 
 def test_provision_requires_dedicated_database_confirmation(database):

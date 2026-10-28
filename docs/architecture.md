@@ -1,6 +1,6 @@
 # Stage 1 architecture and data contract
 
-Status: Stage 1 design approved by the user; Stage 2 implements the configuration and database foundation. Loading, recovery workflows, models and evaluation remain later-stage obligations. See [implemented schema](schema.md) and [Stage 2 operations](stage_2_operations.md) for the concrete foundation.
+Status: Stage 1 design approved by the user; Stage 2 implements the configuration and database foundation. Stage 3 implements loading and recovery against the same contracts; models and evaluation follow in Stages 4–5. The private preparation artifact is concretized as disk-indexed SQLite plus bounded pandas chunks before private PostgreSQL staging; SQLite never substitutes for PostgreSQL transaction tests. See [implemented schema](schema.md) and [Stage 2 operations](stage_2_operations.md) for the concrete foundation.
 
 ## Requirements and boundaries
 

@@ -1,6 +1,6 @@
 # Delivery stages, acceptance, and operation
 
-Stage 1 is approved and Stage 2 is authorized. Stages 3–6 require separate user approval. The Stage 2 delivery implements the project/configuration/schema foundation only. Exactly one independent technical reviewer reads files without altering them; the implementer fixes required findings and returns corrections to the same reviewer. From Stage 2, each authorized stage requires meaningful checks, review, required fixes and re-review, inspected diff, coherent English commit(s), private push, and a user-facing report before asking to start the next stage. No force push or rewritten history.
+Stages 1–2 are delivered. The user authorized continuing through Stages 3–6 without further start approvals. The Stage 2 delivery implements the project/configuration/schema foundation only. Exactly one independent technical reviewer reads files without altering them; the implementer fixes required findings and returns corrections to the same reviewer. From Stage 2, each authorized stage requires meaningful checks, review, required fixes and re-review, inspected diff, coherent English commit(s), private push, and a user-facing report before asking to start the next stage. No force push or rewritten history.
 
 | Stage | Authorized work after its gate | Acceptance evidence |
 | --- | --- | --- |

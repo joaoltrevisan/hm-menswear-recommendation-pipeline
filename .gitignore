@@ -47,3 +47,8 @@ dist/
 .ruff_cache/
 
 .venv-*/
+
+/source_snapshots/
+/preparations/
+/models/
+/inspections/

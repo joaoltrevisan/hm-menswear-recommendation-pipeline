@@ -1,50 +1,245 @@
 {
   "schemas": {
     "hm_migrator": [],
-    "hm_loader": ["control", "quality", "staging", "mart"],
-    "hm_model": ["control", "mart", "serving", "evaluation"],
-    "hm_reader": ["control", "mart", "serving"]
+    "hm_loader": [
+      "control",
+      "quality",
+      "staging",
+      "mart"
+    ],
+    "hm_model": [
+      "control",
+      "mart",
+      "serving",
+      "evaluation"
+    ],
+    "hm_reader": [
+      "control",
+      "mart",
+      "serving"
+    ]
   },
   "tables": {
-    "control.source_files": {"hm_loader": {"SELECT": "*", "INSERT": "*"}},
-    "control.releases": {"hm_loader": {"SELECT": "*", "INSERT": "*"}, "hm_model": {"SELECT": "*"}},
-    "control.release_files": {"hm_loader": {"SELECT": "*", "INSERT": "*"}, "hm_model": {"SELECT": "*"}},
-    "control.lineage": {"hm_loader": {"SELECT": "*", "UPDATE": ["active_release_id"]}, "hm_model": {"SELECT": "*"}},
+    "control.source_files": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*"
+      }
+    },
+    "control.releases": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*"
+      },
+      "hm_model": {
+        "SELECT": "*"
+      }
+    },
+    "control.release_files": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*"
+      },
+      "hm_model": {
+        "SELECT": "*"
+      }
+    },
+    "control.lineage": {
+      "hm_loader": {
+        "SELECT": "*",
+        "UPDATE": [
+          "active_release_id"
+        ]
+      },
+      "hm_model": {
+        "SELECT": "*"
+      }
+    },
     "control.preparations": {
-      "hm_loader": {"SELECT": "*", "INSERT": "*", "UPDATE": ["status", "artifact_sha256", "source_rows", "rejected_rows", "valid_out_of_scope_rows", "valid_menswear_rows", "completed_at"]},
-      "hm_model": {"SELECT": "*"}
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*",
+        "UPDATE": [
+          "status",
+          "artifact_sha256",
+          "source_rows",
+          "rejected_rows",
+          "valid_out_of_scope_rows",
+          "valid_menswear_rows",
+          "completed_at",
+          "error_code"
+        ]
+      },
+      "hm_model": {
+        "SELECT": "*"
+      }
     },
     "control.batches": {
-      "hm_loader": {"SELECT": "*", "INSERT": "*", "UPDATE": ["status", "accepted_rows", "inserted_rows", "reused_rows", "completed_at"]},
-      "hm_model": {"SELECT": "*"}
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*",
+        "UPDATE": [
+          "status",
+          "accepted_rows",
+          "inserted_rows",
+          "reused_rows",
+          "completed_at"
+        ]
+      },
+      "hm_model": {
+        "SELECT": "*"
+      }
     },
-    "control.runs": {"hm_loader": {"SELECT": "*", "INSERT": "*", "UPDATE": ["batch_id", "status", "ended_at", "error_code"]}},
-    "control.batch_records": {"hm_loader": {"SELECT": "*", "INSERT": "*"}, "hm_model": {"SELECT": "*"}},
-    "quality.rejections": {"hm_loader": {"SELECT": "*", "INSERT": "*", "UPDATE": "*", "DELETE": "*"}},
-    "staging.articles": {"hm_loader": {"SELECT": "*", "INSERT": "*", "UPDATE": "*", "DELETE": "*"}},
-    "staging.customers": {"hm_loader": {"SELECT": "*", "INSERT": "*", "UPDATE": "*", "DELETE": "*"}},
-    "staging.purchase_records": {"hm_loader": {"SELECT": "*", "INSERT": "*", "UPDATE": "*", "DELETE": "*"}},
-    "staging.customer_observations": {"hm_loader": {"SELECT": "*", "INSERT": "*", "UPDATE": "*", "DELETE": "*"}},
+    "control.runs": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*",
+        "UPDATE": [
+          "batch_id",
+          "status",
+          "ended_at",
+          "error_code"
+        ]
+      }
+    },
+    "control.batch_records": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*"
+      },
+      "hm_model": {
+        "SELECT": "*"
+      }
+    },
+    "quality.rejections": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*",
+        "UPDATE": "*",
+        "DELETE": "*"
+      }
+    },
+    "staging.articles": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*",
+        "UPDATE": "*",
+        "DELETE": "*"
+      }
+    },
+    "staging.customers": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*",
+        "UPDATE": "*",
+        "DELETE": "*"
+      }
+    },
+    "staging.purchase_records": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*",
+        "UPDATE": "*",
+        "DELETE": "*"
+      }
+    },
+    "staging.customer_observations": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*",
+        "UPDATE": "*",
+        "DELETE": "*"
+      }
+    },
     "mart.articles": {
-      "hm_loader": {"SELECT": "*", "INSERT": "*"},
-      "hm_model": {"SELECT": ["release_id", "article_id", "index_group_name"]},
-      "hm_reader": {"SELECT": "*"}
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*"
+      },
+      "hm_model": {
+        "SELECT": [
+          "release_id",
+          "article_id",
+          "index_group_name"
+        ]
+      },
+      "hm_reader": {
+        "SELECT": "*"
+      }
     },
-    "mart.customers": {"hm_loader": {"SELECT": "*", "INSERT": "*"}},
+    "mart.customers": {
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*"
+      }
+    },
     "mart.purchase_events": {
-      "hm_loader": {"SELECT": "*", "INSERT": "*"},
-      "hm_model": {"SELECT": ["transaction_file_id", "source_record_number", "release_id", "article_id", "customer_id", "purchase_date"]}
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*"
+      },
+      "hm_model": {
+        "SELECT": [
+          "transaction_file_id",
+          "source_record_number",
+          "release_id",
+          "article_id",
+          "customer_id",
+          "purchase_date"
+        ]
+      }
     },
     "mart.customer_observations": {
-      "hm_loader": {"SELECT": "*", "INSERT": "*"},
-      "hm_model": {"SELECT": ["release_id", "customer_id", "first_observed_date"]}
+      "hm_loader": {
+        "SELECT": "*",
+        "INSERT": "*"
+      },
+      "hm_model": {
+        "SELECT": [
+          "release_id",
+          "customer_id",
+          "first_observed_date"
+        ]
+      }
     },
     "control.models": {
-      "hm_model": {"SELECT": "*", "INSERT": "*", "UPDATE": ["status", "completed_at"]},
-      "hm_reader": {"SELECT": ["model_id", "cutoff_date", "family", "status"]}
+      "hm_model": {
+        "SELECT": "*",
+        "INSERT": "*",
+        "UPDATE": [
+          "status",
+          "completed_at"
+        ]
+      },
+      "hm_reader": {
+        "SELECT": [
+          "model_id",
+          "cutoff_date",
+          "family",
+          "status"
+        ]
+      }
     },
-    "serving.recommendations": {"hm_model": {"SELECT": "*", "INSERT": "*"}, "hm_reader": {"SELECT": "*"}},
-    "evaluation.test_sessions": {"hm_model": {"SELECT": "*", "INSERT": "*"}},
-    "evaluation.runs": {"hm_model": {"SELECT": "*", "INSERT": "*"}}
+    "serving.recommendations": {
+      "hm_model": {
+        "SELECT": "*",
+        "INSERT": "*"
+      },
+      "hm_reader": {
+        "SELECT": "*"
+      }
+    },
+    "evaluation.test_sessions": {
+      "hm_model": {
+        "SELECT": "*",
+        "INSERT": "*"
+      }
+    },
+    "evaluation.runs": {
+      "hm_model": {
+        "SELECT": "*",
+        "INSERT": "*"
+      }
+    }
   }
 }
