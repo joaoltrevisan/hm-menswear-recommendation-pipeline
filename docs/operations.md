@@ -19,6 +19,8 @@ set +a
 .venv/bin/hm-menswear prepare
 ```
 
+The full sequence below describes a new controlled reproduction. **This delivery has already consumed its final test.** On its existing database, use `export-test --session TEST_SESSION_UUID --output NEW_PRIVATE_REPORT` to retrieve the stored results. Rebuilding a database or replaying a comparison is reproduction, not a new independent holdout. Resume an interrupted frozen evaluation only from its original reviewed code/lock and comparison JSON.
+
 Capture the preparation UUID from the safe JSON response, then use it explicitly:
 
 ```sh
@@ -38,7 +40,7 @@ A historical load publishes facts and observation identities. It never trains a 
 
 ## Incremental job and opt-in schedules
 
-`load-next` finds the earliest uncovered date inside the prepared source calendar and publishes at most one seven-day half-open window. Overlapping completed windows are merged; an upcoming covered interval clips the new window. At source end it returns `source_exhausted` and performs no publication. Two concurrent invocations may choose the same gap; the underlying serialized/idempotent loader turns the second into a no-op. It retries transient connection/serialization/deadlock failures at most three attempts with1s/2s backoff; data/contract failures are never retried automatically. The invocation freezes its chosen date window before publication; every publication retry repeats that same window as a fresh owned attempt. An uncertain committed outcome becomes a no-op, and cannot advance another week. A lost connection cannot resume a publishing transaction.
+`load-next` finds the earliest uncovered date inside the prepared source calendar and publishes at most one seven-day half-open window. Overlapping completed windows are merged; an upcoming covered interval clips the new window. At source end it returns `source_exhausted` and performs no publication. Two concurrent invocations may choose the same gap; the underlying serialized/idempotent loader turns the second into a no-op. It retries transient connection/serialization/deadlock failures at most three attempts with 1s/2s backoff; data/contract failures are never retried automatically. The invocation freezes its chosen date window before publication; every publication retry repeats that same window as a fresh owned attempt. An uncertain committed outcome becomes a no-op, and cannot advance another week. A lost connection cannot resume a publishing transaction.
 
 Use the example wrapper after setting its project/preparation placeholders. The examples are not installed. For Linux cron, adapt [the cron example](../examples/historical-load.cron) for a daily historical arrival and protected stdout files outside Git. For macOS, substitute [the launchd example](../examples/historical-load.plist)'s absolute project/script/private-log paths before loading it yourself. Disable the schedule once the source is exhausted. A scheduler may continue invoking the no-op end check until disabled; no fresh source is invented. Retaining historical schedules after this finite replay provides no new data.
 
@@ -57,3 +59,9 @@ Exit codes:0success;2configuration/contract/input/IO error;3database failure;4un
 For an interrupted final-test workflow, retain its original comparison JSON and original code/lock: only that frozen recipe can resume. Results are stored for all ten models atomically. If only report export failed, use the same receipt and a new output path; never clear the session or change protocol names to claim untouched labels. An administrator's manual label query/database rebuild can invalidate the evaluation protocol and must be disclosed. Retries cannot restore holdout independence after a changed algorithm has seen its results.
 
 Keep source CSVs, source snapshots, staging artifacts, model arrays/mappings, logs, reports and all credentials under private owner-only storage outside Git. Do not redistribute data with the code. PostgreSQL suppresses ordinary statement/error payload logging to pass the verified sentinel gate; this intentionally reduces server diagnostics. Catastrophic/admin-reconfigured logging is outside that guarantee. The reader role is a local job role, not per-user authentication or row-level access control for a web service.
+
+## Final local demonstration
+
+Reviewed operational code `d50d71a720c61bffca5d1d553366eb6d0ad373ba` was committed before fitting. The actual source-end `load-next` returned `source_exhausted` with retry_count=0 and no new publication. `retrain-selected` retained repeat_history W=7 from the immutable validation decision and fitted through September 22, 2020: 1,771,053 occurrences, 1,362,281 past-known identities, 339,126 warm customers and 12,457 past-purchased candidates. Its September 23–29 horizon has no source labels and is explicitly unmeasured.
+
+A private stdin CLI query returned 12 distinct articles with strategy repeat_history and did not echo the customer identifier; only those aggregate checks are recorded here. Version 0.6 `export-test` returned JSON identical to the original frozen result file without scoring labels. Registry reconciliation remained 1,771,053 mart occurrences, 105 completed batches, one final-test receipt and ten test reports. The three original CSV hashes still match their pinned digests. Artifacts and the local aggregate verification report remain private outside Git.
