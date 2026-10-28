@@ -45,13 +45,13 @@ Invalid tokens can remain in staging so reasons can be traced. Mart domain const
 
 Composite file-role FKs ensure transaction provenance belongs to the pinned release and is not an article/customer file. Mart inserts require the active release. All canonical facts, dimensions and observations are immutable. A fact/observation first batch must be pending and match its date at insertion, then completed in the same transaction. Batch membership may reuse an already committed fact for an overlapping window without inserting the purchase again. Leading zeros and missing optional flags survive storage. A source row remains a purchase occurrence, not an order.
 
-## Future model and serving structures
+## Model and serving structures
 
 | Table / key | Contents and limits |
 | --- | --- |
 | `control.models` / manifest-derived model_id | release/cutoff/family, config/input/lock hashes, code commit, private manifest/location, build status/completion; immutable after terminal state |
 | `serving.recommendations` / model, customer, rank | release, article, finite nonnegative score and optional safe fallback reason; rank 1–12 and unique article per model/customer |
-| `evaluation.test_sessions` / session UUID | Unique protocol hash, frozen selected model and recipe hash, timestamp; one reserved-test session per protocol |
+| `evaluation.test_sessions` / session UUID | Unique protocol hash, frozen selected validation model and recipe hash, timestamp; Stage 5 adds release FK, full immutable recipe/allowed-refit JSON and a unique source-release constraint |
 | `evaluation.runs` / evaluation UUID | model, protocol/config hashes, split, aggregate cohort/metric JSON objects, timestamp and required test-session reference for test split |
 
 Serving inserts require a complete model, a customer observed by cutoff, and an article with purchase evidence by cutoff. Persisted serving rows represent known-customer populations; CLI fallback for an entirely unknown ID will be computed locally without inserting a registry/customer record. Catalog inclusion alone cannot authorize recommendation of a future-only item. Ranking, training history completeness, manifests/artifact checksums, metric formulas, selection and execution of the final test are later-stage application obligations; these JSON structures do not certify them.
@@ -71,3 +71,7 @@ A test session can contain one result per frozen model/protocol, so the selected
 All five groups are NOLOGIN and lack superuser/createdb/createrole/replication/bypass-RLS flags. Login accounts inherit only their matching group. PUBLIC has no project schema/table/function/domain or dedicated-database connect/temp/create privileges. No default grant applies to future tables; migrations must explicitly grant minimum access. These are local job-role boundaries, not a multi-tenant authentication service or per-customer row-level authorization layer.
 
 Provisioning audits effective privileges against the packaged [permission policy](../src/hm_menswear/permission_policy.json), including table/column rights, PUBLIC/inherited access, schema usage, callable project functions and sequences. Excess access is rejected transactionally with preexisting ACLs preserved. This supplements the DDL/TEMP/ownership checks; role flags alone are insufficient. Future permission changes must update both SQL grants and this policy in the same reviewed delivery.
+
+## Frozen holdout migration
+
+[Migration 0005](../src/hm_menswear/sql/0005_reserved_test.sql) strengthens the previously empty test-session structure: each source release can have only one reservation even if protocol text changes. Existing immutability triggers and INSERT/SELECT-only model privileges protect the receipt. The receipt contains the exact ten refitted model IDs and the validation-selected recipe; `evaluation.runs` stores aggregate results atomically for all ten. The app commits the reservation before reading test labels, serializes by a release advisory lock and returns stored results on completed replay. A new recipe cannot make inspected labels untouched. This is an application evaluation protocol, not protection against an administrator manually querying labels or rebuilding the database.

@@ -86,7 +86,7 @@ def test_future_only_labels_stay_in_denominator_and_no_buyers_are_zero():
     snapshot = synthetic_snapshot()
     fitted = fit_baseline(snapshot, "repeat_history", 7)
     model = {
-        "manifest": {"cutoff": snapshot.cutoff},
+        "manifest": {"cutoff": snapshot.cutoff, "family": "repeat_history"},
         "arrays": {
             "known_ids": snapshot.known_ids,
             "warm_ids": snapshot.warm_ids,
@@ -132,7 +132,7 @@ def test_empty_candidates_and_empty_populations_are_explicit():
     def model(known):
         empty = np.empty(0, dtype=np.int32)
         return {
-            "manifest": {"cutoff": "2020-09-08"},
+            "manifest": {"cutoff": "2020-09-08", "family": "repeat_history"},
             "arrays": {
                 "known_ids": np.array(known, dtype="S64"),
                 "warm_ids": np.empty(0, dtype="S64"),

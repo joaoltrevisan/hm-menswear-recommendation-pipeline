@@ -147,8 +147,13 @@ def load_model(work_dir, model_id):
         arrays = {name: saved[name] for name in saved.files}
     expected = (len(arrays["warm_ids"]), min(12, len(arrays["articles"])))
     predictions = arrays["predictions"]
-    if predictions.shape != expected or (
-        predictions.size and (predictions.min() < 0 or predictions.max() >= len(arrays["articles"]))
+    if (
+        predictions.dtype.kind not in "iu"
+        or predictions.shape != expected
+        or (
+            predictions.size
+            and (predictions.min() < 0 or predictions.max() >= len(arrays["articles"]))
+        )
     ):
         raise PipelineError("invalid_model_prediction_shape")
     if predictions.shape[1] > 1 and np.any(np.diff(np.sort(predictions, axis=1), axis=1) == 0):
@@ -165,11 +170,35 @@ def load_model(work_dir, model_id):
         raise PipelineError("model_population_count_mismatch")
     pop = arrays["popularity"]
     if (
-        pop.shape != (expected[1],)
+        pop.dtype.kind not in "iu"
+        or pop.shape != (expected[1],)
         or len(np.unique(pop)) != len(pop)
         or (pop.size and (pop.min() < 0 or pop.max() >= len(arrays["articles"])))
     ):
         raise PipelineError("invalid_model_fallback")
+    if len(arrays["warm_ids"]) and not np.all(
+        np.isin(arrays["warm_ids"], arrays["known_ids"], assume_unique=True)
+    ):
+        raise PipelineError("model_warm_population_not_known")
+    if manifest["family"] == "item_item":
+        from scipy.sparse import csr_array
+
+        flags = arrays["personalized"]
+        if flags.dtype != np.bool_ or flags.shape != (expected[0],):
+            raise PipelineError("invalid_personalization_flags")
+        graph = csr_array(
+            (arrays["graph_values"], arrays["graph_indices"], arrays["graph_indptr"]),
+            shape=(len(arrays["articles"]), len(arrays["articles"])),
+        )
+        graph.check_format(full_check=True)
+        if (
+            not np.all(np.isfinite(graph.data))
+            or np.any(graph.data <= 0)
+            or np.any(graph.data > 1 + 1e-12)
+            or np.any(graph.diagonal() != 0)
+            or np.any(np.diff(graph.indptr) > manifest["parameters"]["neighbors"])
+        ):
+            raise PipelineError("invalid_item_similarity_graph")
     return {"model_id": model_id, "manifest": manifest, "arrays": arrays}
 
 
@@ -205,6 +234,8 @@ def recommend(model, customer, k=12):
             if model["manifest"]["family"] == "popularity"
             else model["manifest"]["family"]
         )
+        if model["manifest"]["family"] == "item_item" and not arrays["personalized"][index]:
+            reason = "insufficient_item_signal_history_fallback"
     else:
         chosen = arrays["popularity"]
         index = int(np.searchsorted(arrays["known_ids"], token))

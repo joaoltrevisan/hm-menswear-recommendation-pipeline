@@ -58,6 +58,13 @@ def validate_protocol(protocol):
         or protocol.get("repeat_purchase_recommendations") is not True
     ):
         raise PipelineError("invalid_temporal_evaluation_protocol")
+    if (
+        protocol.get("item_score_popularity_tie") != "best_popularity_validation_window"
+        or protocol.get("item_history_fallback") != "best_repeat_history_validation_configuration"
+        or protocol.get("item_cold_fallback") != "same_repeat_history_popularity_filler"
+        or protocol.get("random_seed") != 0
+    ):
+        raise PipelineError("invalid_temporal_evaluation_protocol")
     return protocol
 
 

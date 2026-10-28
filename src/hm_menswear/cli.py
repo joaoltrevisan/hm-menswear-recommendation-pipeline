@@ -10,14 +10,17 @@ from hm_menswear import __version__
 from hm_menswear.config import ConfigurationError, Settings
 from hm_menswear.db import DatabaseContractError, connect, migrate, provision
 from hm_menswear.evaluation.evaluate import evaluate_model
+from hm_menswear.evaluation.holdout import frozen_final_test
 from hm_menswear.evaluation.protocol import load_protocol
 from hm_menswear.extraction.source import canonical_json, capture_sources
 from hm_menswear.loading.lifecycle import recover_run
 from hm_menswear.loading.preparation import prepare_dataset
 from hm_menswear.loading.publish import load_all, load_window
 from hm_menswear.recommendation.artifacts import load_registered_model, recommend
+from hm_menswear.recommendation.comparison import compare_models
 from hm_menswear.recommendation.workflow import (
     compare_baselines,
+    report_path,
     save_private_report,
     train_baseline,
 )
@@ -64,6 +67,11 @@ def parser():
     evaluate.add_argument("--output", required=True)
     compare = commands.add_parser("compare-baselines")
     compare.add_argument("--output", required=True)
+    full = commands.add_parser("compare-models")
+    full.add_argument("--output", required=True)
+    final = commands.add_parser("final-test")
+    final.add_argument("--comparison", required=True)
+    final.add_argument("--output", required=True)
     recommendations = commands.add_parser("recommend")
     recommendations.add_argument("--model-id", required=True)
     recommendations.add_argument("--customer", required=True)
@@ -99,14 +107,33 @@ def execute(args, settings):
                 ]
             },
         }
-    if args.command == "compare-baselines":
-        report = compare_baselines(settings, load_protocol())
+    if args.command in ("compare-baselines", "compare-models", "final-test"):
+        report_path(settings, args.output)
+        if args.command == "final-test":
+            path = Path(args.comparison).expanduser().resolve()
+            if not path.is_relative_to(settings.work_dir):
+                raise PipelineError("comparison_must_be_inside_private_work_directory")
+            report = frozen_final_test(settings, json.loads(path.read_text()), load_protocol())
+            save_private_report(settings, args.output, report)
+            selected = next(r for r in report["reports"] if r["selected"])
+            return {
+                "status": report["status"],
+                "selected_model_id": selected["model_id"],
+                "family": selected["family"],
+                "parameters": selected["parameters"],
+                "test_reselection_permitted": False,
+            }
+        report = (compare_baselines if args.command == "compare-baselines" else compare_models)(
+            settings, load_protocol()
+        )
         save_private_report(settings, args.output, report)
         return {
             "status": report["status"],
-            "selected_model_id": report["selected_baseline_model_id"],
-            "family": report["selected_baseline_family"],
-            "parameters": report["selected_baseline_parameters"],
+            "selected_model_id": report.get(
+                "selected_model_id", report["selected_baseline_model_id"]
+            ),
+            "family": report.get("selected_family", report["selected_baseline_family"]),
+            "parameters": report.get("selected_parameters", report["selected_baseline_parameters"]),
             "final_test_consumed": False,
         }
     if args.command in ("evaluate", "recommend"):
@@ -114,6 +141,7 @@ def execute(args, settings):
             model = load_registered_model(conn, settings.work_dir, args.model_id)
             if args.command == "recommend":
                 return recommend(model, args.customer, args.k)
+            report_path(settings, args.output)
             report = evaluate_model(conn, model, load_protocol(), split=args.split)
         save_private_report(settings, args.output, report)
         return report
@@ -182,7 +210,8 @@ def main(argv=None):
             else "migration"
             if args.command == "db"
             else "model"
-            if args.command in ("train", "evaluate", "compare-baselines")
+            if args.command
+            in ("train", "evaluate", "compare-baselines", "compare-models", "final-test")
             else "reader"
             if args.command == "recommend"
             else "loader"

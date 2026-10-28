@@ -81,11 +81,20 @@ def compare_baselines(settings, protocol, *, identity=None):
     }
 
 
-def save_private_report(settings, path, report):
+def report_path(settings, path):
     path = Path(path).expanduser().resolve()
     if not path.is_relative_to(settings.work_dir):
         raise PipelineError("report_must_be_inside_private_work_directory")
+    if path.exists():
+        raise PipelineError("report_already_exists")
+    return path
+
+
+def save_private_report(settings, path, report):
+    import os
+
+    path = report_path(settings, path)
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    with path.open("x") as stream:
+    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w") as stream:
         stream.write(canonical_json(report) + "\n")
     path.chmod(0o600)

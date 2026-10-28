@@ -41,7 +41,7 @@ def test_failed_migration_rolls_back_all_schema(database, monkeypatch):
             original
             + [
                 (
-                    "0005_synthetic_failure.sql",
+                    f"{len(original) + 1:04d}_synthetic_failure.sql",
                     "CREATE TABLE mart.synthetic_failure(id int); SELECT 1/0;",
                     "f" * 64,
                 )
