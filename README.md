@@ -3,7 +3,15 @@
 
 
 
-Independent educational case study and sales-data integration/recommendation pipeline with a simulated service scenario. No employment, commission or affiliation with H&M is claimed. This project reconstructs historical recommendations; it has no live internal integration or current competition participation.
+
+
+
+
+Independent educational case study with a simulated service scenario. No employment, commission or affiliation with H&M is claimed. This project reconstructs historical recommendations; it has no live internal integration or current competition participation.
+
+
+
+
 
 
 
@@ -13,12 +21,24 @@ Independent educational case study and sales-data integration/recommendation pip
 
 
 
+
+
+
+
 The declared ten-configuration validation selected **repeat history with a 7-day popularity filler**. Item-item did not improve the primary validation metric. On the reserved final week, the selected recipe measured **MAP@12 0.00022207389**, **Recall@12 0.00057269175** and **catalog coverage 0.98456940** over **1,356,709 identities known before cutoff**, including nonbuyers assigned zero. Buyer-conditioned diagnostics use different denominators and are reported separately. This is one historical test week, not measured sales lift or competition leaderboard performance.
 
 
 
 
+
+
+
+
 Start with the [complete operational walkthrough](docs/operations.md): locked installation, private configuration, PostgreSQL setup, historical loading, comparison, immutable final-test reservation, explicit selected-recipe retraining and recommendation queries. `scripts/demo.sh` runs an independently synthetic CLI walkthrough in isolated PostgreSQL databases without competition-file access. Cron/launchd examples are opt-in and have not been installed. The source ends on September 22,2020; later seven-day forecasts are unobserved historical horizons.
+
+
+
+
 
 
 
@@ -37,12 +57,24 @@ Start with the [complete operational walkthrough](docs/operations.md): locked in
 
 
 
+
+
+
+
 Exactly one independent read-only technical reviewer reviewed each implementation stage. Verification records: [Stage 1](docs/review_stage_1.md), [Stage 2](docs/review_stage_2.md), [Stage 3](docs/review_stage_3.md), [Stage 4](docs/review_stage_4.md), [Stage 5](docs/review_stage_5.md), [Stage 6](docs/review_stage_6.md).
 
 
 
 
+
+
+
+
 The repository remains private. Source CSVs, private model/customer mappings, reports, logs and credentials stay outside Git. Obtain competition data only through authorized access; no data is redistributed or licensed with this code. No deployment, public visibility change or Kaggle submission was performed.
+
+
+
+
 
 
 
